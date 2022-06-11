@@ -13,7 +13,7 @@ app.set("port", port);
 
 const mongoUrl = `mongodb://${process.env.MONGO_HOSTNAME || ""}:${
   process.env.MONGO_PORT || ""
-}/exp-books-api`;
+}/user-api`;
 mongoose.connect(mongoUrl);
 
 const server: http.Server = http.createServer(app);
