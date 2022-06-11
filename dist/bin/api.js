@@ -13,7 +13,7 @@ dotenv_1.default.config();
 const port = parseInt(process.env.PORT || "3000");
 const hostname = process.env.HOSTNAME || "localhost";
 app_1.default.set("port", port);
-const mongoUrl = `mongodb://${process.env.MONGO_HOSTNAME || ""}:${process.env.MONGO_PORT || ""}/exp-books-api`;
+const mongoUrl = `mongodb://${process.env.MONGO_HOSTNAME || ""}:${process.env.MONGO_PORT || ""}/user-api`;
 mongoose_1.default.connect(mongoUrl);
 const server = http_1.default.createServer(app_1.default);
 server.listen(port);
