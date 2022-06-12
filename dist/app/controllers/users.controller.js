@@ -15,41 +15,57 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.delete_ = exports.put = exports.post = exports.get = void 0;
 const user_model_1 = __importDefault(require("../models/user.model"));
 const get = (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
-    const users = yield user_model_1.default.find(req.query);
-    res.json(users);
+    let id = req.params.id;
+    if (id) {
+        {
+            const count = 24 - id.length;
+            for (let i = 0; i < count; i++) {
+                id += "f";
+            }
+        }
+        const user = yield user_model_1.default.findById(id);
+        if (user) {
+            res.json(user);
+        }
+        else {
+            res.status(404).json({ message: "User not found" });
+        }
+    }
+    else {
+        res.json(yield user_model_1.default.find());
+    }
 });
 exports.get = get;
 const post = (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     const newUser = new user_model_1.default(req.body);
     yield newUser.save();
-    yield res.json({ ok: true, user: newUser });
+    yield res.json({ ok: true, id: newUser._id });
 });
 exports.post = post;
 const put = (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
-    let id = String(req.params.id);
+    let id = req.params.id;
     {
         const count = 24 - id.length;
         for (let i = 0; i < count; i++) {
-            id += 'f';
+            id += "f";
         }
-        ;
     }
     const user = yield user_model_1.default.findById(id);
     if (!user) {
         res.status(404).json({ ok: false, message: "User not found" });
         return;
     }
-    res.json({ ok: true, user, editedUser: yield user.set(req.body).save() });
+    yield user.set(req.body).save();
+    res.json({ ok: true });
 });
 exports.put = put;
 const delete_ = (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
-    let id = String(req.params.id);
+    let id = req.params.id;
     {
         const count = 24 - id.length;
         for (let i = 0; i < count; i++) {
-            id += 'f';
+            id += "f";
         }
-        ;
     }
     const user = yield user_model_1.default.findById(id);
     if (!user) {
@@ -57,6 +73,6 @@ const delete_ = (req, res, next) => __awaiter(void 0, void 0, void 0, function* 
         return;
     }
     yield user.deleteOne();
-    yield res.json({ ok: true, user });
+    yield res.json({ ok: true });
 });
 exports.delete_ = delete_;
