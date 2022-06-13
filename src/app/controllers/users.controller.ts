@@ -1,19 +1,22 @@
 import { Controller } from "helpers/types.helper";
 import User, { IUser } from "../models/user.model";
+import { errors, statuses } from "../../helpers/constants.helper";
+import { CallbackError } from "mongoose";
 
 export const get: Controller = async (req, res, next) => {
   let id: string = req.params.id;
   if (id) {
-    {
-      const count = 24 - id.length;
-      for (let i = 0; i < count; i++) {id += "f"}
-    }
-    const user = await User.findById(id);
-    if (user) {
-      res.json(user);
-    } else {
-      res.status(404).json({ message: "User not found" });
-    }
+    User.findById(id, null, (err, user) => {
+      if (err) {
+        res.status(statuses.Unknown).json({ ok: false, error: err });
+      } else if (!user) {
+        res
+          .status(statuses.NotFound)
+          .json({ ok: false, error: errors.NotFound });
+      } else {
+        res.json(user);
+      }
+    });
   } else {
     res.json(await User.find());
   }
@@ -21,40 +24,44 @@ export const get: Controller = async (req, res, next) => {
 
 export const post: Controller = async (req, res, next) => {
   const newUser: IUser = new User(req.body);
-  await newUser.save();
-  await res.json({ ok: true, id: newUser._id });
+  User.create(newUser, (err, user) => {
+    if (err) {
+      res.status(500).json({ ok: false, error: err });
+    } else {
+      res.json({ ok: true, _id: user._id });
+    }
+  });
 };
 
 export const put: Controller = async (req, res, next) => {
-  let id: string = req.params.id;
-  {
-    const count = 24 - id.length;
-    for (let i = 0; i < count; i++) {
-      id += "f";
+  User.findByIdAndUpdate(
+    req.params.id,
+    req.body,
+    (err: CallbackError, user: IUser) => {
+      if (err) {
+        res.status(statuses.Unknown).json({ ok: false, error: err });
+      } else if (!user) {
+        res
+          .status(statuses.NotFound)
+          .json({ ok: false, error: errors.NotFound });
+      } else {
+        res.json({ ok: true });
+      }
     }
-  }
-  const user = await User.findById(id);
-  if (!user) {
-    res.status(404).json({ ok: false, message: "User not found" });
-    return;
-  }
-  await user.set(req.body).save();
-  res.json({ ok: true });
+  );
 };
 
 export const delete_: Controller = async (req, res, next) => {
-  let id: string = req.params.id;
-  {
-    const count = 24 - id.length;
-    for (let i = 0; i < count; i++) {
-      id += "f";
+  User.findByIdAndDelete(req.params.id, (err: any, user: IUser) => {
+    if (err) {
+      res.status(statuses.Unknown).json({ ok: false, error: err });
+    } else if (!user) {
+      res.status(statuses.NotFound).json({
+        ok: false,
+        error: errors.NotFound,
+      });
+    } else {
+      res.json({ ok: true });
     }
-  }
-  const user = await User.findById(id);
-  if (!user) {
-    res.status(404).json({ ok: false, message: "User not found" });
-    return;
-  }
-  await user.deleteOne();
-  await res.json({ ok: true });
+  });
 };

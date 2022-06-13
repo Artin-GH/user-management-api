@@ -14,22 +14,23 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.delete_ = exports.put = exports.post = exports.get = void 0;
 const user_model_1 = __importDefault(require("../models/user.model"));
+const constants_helper_1 = require("../../helpers/constants.helper");
 const get = (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     let id = req.params.id;
     if (id) {
-        {
-            const count = 24 - id.length;
-            for (let i = 0; i < count; i++) {
-                id += "f";
+        user_model_1.default.findById(id, null, (err, user) => {
+            if (err) {
+                res.status(constants_helper_1.statuses.Unknown).json({ ok: false, error: err });
             }
-        }
-        const user = yield user_model_1.default.findById(id);
-        if (user) {
-            res.json(user);
-        }
-        else {
-            res.status(404).json({ message: "User not found" });
-        }
+            else if (!user) {
+                res
+                    .status(constants_helper_1.statuses.NotFound)
+                    .json({ ok: false, error: constants_helper_1.errors.NotFound });
+            }
+            else {
+                res.json(user);
+            }
+        });
     }
     else {
         res.json(yield user_model_1.default.find());
@@ -38,41 +39,46 @@ const get = (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
 exports.get = get;
 const post = (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     const newUser = new user_model_1.default(req.body);
-    yield newUser.save();
-    yield res.json({ ok: true, id: newUser._id });
+    user_model_1.default.create(newUser, (err, user) => {
+        if (err) {
+            res.status(500).json({ ok: false, error: err });
+        }
+        else {
+            res.json({ ok: true, _id: user._id });
+        }
+    });
 });
 exports.post = post;
 const put = (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
-    let id = req.params.id;
-    {
-        const count = 24 - id.length;
-        for (let i = 0; i < count; i++) {
-            id += "f";
+    user_model_1.default.findByIdAndUpdate(req.params.id, req.body, (err, user) => {
+        if (err) {
+            res.status(constants_helper_1.statuses.Unknown).json({ ok: false, error: err });
         }
-    }
-    const user = yield user_model_1.default.findById(id);
-    if (!user) {
-        res.status(404).json({ ok: false, message: "User not found" });
-        return;
-    }
-    yield user.set(req.body).save();
-    res.json({ ok: true });
+        else if (!user) {
+            res
+                .status(constants_helper_1.statuses.NotFound)
+                .json({ ok: false, error: constants_helper_1.errors.NotFound });
+        }
+        else {
+            res.json({ ok: true });
+        }
+    });
 });
 exports.put = put;
 const delete_ = (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
-    let id = req.params.id;
-    {
-        const count = 24 - id.length;
-        for (let i = 0; i < count; i++) {
-            id += "f";
+    user_model_1.default.findByIdAndDelete(req.params.id, (err, user) => {
+        if (err) {
+            res.status(constants_helper_1.statuses.Unknown).json({ ok: false, error: err });
         }
-    }
-    const user = yield user_model_1.default.findById(id);
-    if (!user) {
-        res.status(404).json({ ok: false, message: "User not found" });
-        return;
-    }
-    yield user.deleteOne();
-    yield res.json({ ok: true });
+        else if (!user) {
+            res.status(constants_helper_1.statuses.NotFound).json({
+                ok: false,
+                error: constants_helper_1.errors.NotFound,
+            });
+        }
+        else {
+            res.json({ ok: true });
+        }
+    });
 });
 exports.delete_ = delete_;
