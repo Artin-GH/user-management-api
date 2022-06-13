@@ -26,7 +26,7 @@ export const post: Controller = async (req, res, next) => {
   const newUser: IUser = new User(req.body);
   User.create(newUser, (err, user) => {
     if (err) {
-      res.status(500).json({ ok: false, error: err });
+      res.status(statuses.Unknown).json({ ok: false, error: err });
     } else {
       res.json({ ok: true, _id: user._id });
     }

@@ -41,7 +41,7 @@ const post = (req, res, next) => __awaiter(void 0, void 0, void 0, function* () 
     const newUser = new user_model_1.default(req.body);
     user_model_1.default.create(newUser, (err, user) => {
         if (err) {
-            res.status(500).json({ ok: false, error: err });
+            res.status(constants_helper_1.statuses.Unknown).json({ ok: false, error: err });
         }
         else {
             res.json({ ok: true, _id: user._id });
