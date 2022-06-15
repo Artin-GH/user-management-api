@@ -20,8 +20,8 @@ app.use(cookieParser());
 app.use(fileUpload());
 
 app.use("/users", routers.users);
-app.use('/', async (req, res, next) => {
-  await res.redirect('/users')
+app.use('/', (req, res, next) => {
+  res.redirect('/users')
 })
 
 app.use(function (req: Request, res: Response, next: NextFunction) {
